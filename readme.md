@@ -1,4 +1,4 @@
-#Laravel Init
+# Laravel Init
 Automate Laravel project setup with a simple python script
 
 ## Why this project exists

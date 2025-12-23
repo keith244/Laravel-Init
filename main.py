@@ -29,30 +29,45 @@ def validate_environment_tools_exist():
 
 
 def create_project_folder():
+    # asks for project name
+    while True:
+        folder_name = input("Enter project name: ").strip()
+        if not folder_name:
+            print("x Project name cannot be empty.")
+            continue
+
+        if not all(c.isalnum() or c in '-_' for c in folder_name):
+            print("x Use only letters, numbers, hyphens, and underscores.")
+            continue
+        # valid name, break
+        break
+
     root = tk.Tk()
     root.withdraw()
 
     # user selects directory
-    selected_directory = filedialog.askdirectory(title="Select parent folder")
-
-    if selected_directory:
-        # ask for folder name
-        folder_name = input("Enter folder name: ") 
-
-        # create path and directory
-
-        target_path = Path(selected_directory)/folder_name
-        if target_path.exists():
-            print(f"Error: Folder '{folder_name}' already exists at {selected_directory}!")
-            print("Please choose a different name.")
-            return None
-        target_path.mkdir(parents=True, exist_ok=True)
-        print(f"Folder created: {target_path}")
-        return target_path
-    else:
-        print('No folder created. ')
+    selected_directory = filedialog.askdirectory(
+            title=f"Select location for '{folder_name}' project"
+        )
+    if not selected_directory:
+        print('✗ No folder selected.')
         return None
     
+    target_path = Path(selected_directory) / folder_name
+    
+    if target_path.exists():
+        print(f"✗ Folder '{folder_name}' already exists at {selected_directory}!")
+        print("Please choose a different name or location.")
+        return None
+    
+    # create folder
+    try:
+        target_path.mkdir(parents=True, exist_ok=False)
+        print(f"✓ Folder created: {target_path}")
+        return target_path
+    except Exception as e:
+        print(f"✗ Error creating folder: {e}")
+        return None    
 
     
 def install_laravel(project_path):
@@ -160,9 +175,16 @@ def main():
     else:
         print("\n✗ Laravel installation failed.")
     
-    print("Step 4: Initialising git repository")
-    if initialise_git(project_path):
-        print(f'Set up complete.')
+    print("Step 4: Initialise Git repository")
+    setup_git = input("Set up git remote repository? (y/n): ").lower()
+    if setup_git == 'y':
+        if initialise_git(project_path):
+            print(f'Set up complete.')
+        else:
+            print("Git set up failed, but your laravel project is ready.")
+    else:
+        print("Skipping Git remote setup.")
+
 
 if __name__ == "__main__":
     main()

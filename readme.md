@@ -11,7 +11,7 @@ Setting up Laravel projects manually can be tedious, so this tool helps solve th
 - Environment validation - Checks if composer,php are installed in the system
 - Interactive folder selection - User selects where they want their project
 - Duplicate name detection - avoids overriding existing folders
-- Automatic laravel installation - runs "composer create-project" for you
+- Automatic laravel installation - runs **composer create-project** for you
 
 ## Prerequisites
 - Python 3.7+

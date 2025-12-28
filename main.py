@@ -8,7 +8,7 @@ import shutil
 
 def validate_environment_tools_exist():
     composer_path = shutil.which('composer')
-    tools = ['composer','php']
+    tools = ['composer','php','git']
     all_valid = True
 
     for tool in tools:
@@ -40,10 +40,13 @@ def create_project_folder():
             print("x Use only letters, numbers, hyphens, and underscores.")
             continue
         # valid name, break
+        print(f"Project name: {folder_name}")
         break
 
     root = tk.Tk()
     root.withdraw()
+    root.attributes('-topmost',True)
+    root.update()
 
     # user selects directory
     selected_directory = filedialog.askdirectory(
@@ -98,6 +101,9 @@ def install_laravel(project_path):
         return False
     
 
+
+
+
 def initialise_git(project_path):
     tool = 'git'
     tool_path = shutil.which(tool)
@@ -117,7 +123,7 @@ def initialise_git(project_path):
     }
 
 
-    # change wd, run git commands
+    # change working directory, run git commands
     try:
         subprocess.run([
             tool,
@@ -180,6 +186,9 @@ def main():
     if setup_git == 'y':
         if initialise_git(project_path):
             print(f'Set up complete.')
+            print(f"\nYour Laravel project is ready at:")
+            print(f"  {project_path}")
+
         else:
             print("Git set up failed, but your laravel project is ready.")
     else:

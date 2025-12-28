@@ -102,6 +102,80 @@ def install_laravel(project_path):
     
 
 
+def use_local_laravel(project_path):
+    if not project_path:
+        print("[Error] No valid project path provided")
+        return False
+    
+    script_dir = Path(__file__).parent
+    source_path = script_dir /"blueprint" / "source_app"
+
+    if not source_path.exists():
+        print(f"[ERROR] Blueprint not found at: {source_path}")
+        print("Tip: Create a 'laravel_blueprint' folder next to this script")
+        return False
+    
+    composer_path = shutil.which('composer')
+    if not composer_path:
+        print('Composer not found')
+        return False
+    
+    # source_folder = "C:/Users/User/OneDrive/Desktop/python/cool_python_idea/blueprint/source_app"
+    # destination_folder = f"{project_path}"
+
+    
+    try:
+        print(f"\nCopying laravel from \n{source_path} to \n{project_path}")
+        shutil.copytree(source_path,project_path,dirs_exist_ok=True)
+        print(f"[OK] Folder content copied succesfully\n")
+
+        # set up .env file
+        env_example = project_path / '.env.example'
+        env_file = project_path / '.env'
+        if env_example.exists() and not env_file.exists():
+            shutil.copy(env_example,env_file)
+            print("[OK] .env file created\n")
+        else:
+            print("[WARNING] .env.example not found, skipping .env creation\n")
+
+
+        print("Verifying dependencies (quick check)...")
+        result=subprocess.run(
+            [composer_path, 'install', '--no-interaction', '--no-dev'],
+            cwd=project_path,
+            check=False,
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            print("[WARNING] Composer verification had issues:")
+            print(result.stderr)
+            print("\nBut continuing anyway (vendor folder already copied)...\n")
+        else:
+            print("[OK] Dependencies verified\n")
+        print("[OK] Dependencies verified\n")
+
+        
+        php_path = shutil.which('php')
+        if php_path:
+            print("Generating application key...")
+            subprocess.run(
+                [php_path, 'artisan', 'key:generate', '--force'],
+                cwd=project_path,
+                check=True,
+                capture_output=True
+            )
+            print("[OK] Application key generated\n")
+
+        print("[OK] Laravel App ready!")
+        return True
+    except Exception as e:
+        print(f"[Error] {e}")
+        return False
+
+
+
 
 
 def initialise_git(project_path):
@@ -175,11 +249,15 @@ def main():
         return
     
     # Step 3: Install Laravel
-    print("\nStep 3: Installing Laravel...")
-    if install_laravel(project_path):
-        print(f"\nSetup complete! Your Laravel project is at: {project_path}")
-    else:
-        print("\n✗ Laravel installation failed.")
+    local_download = input("Use local laravel or download from web? y(local) or n(online): ")
+    if local_download == 'y':
+        use_local_laravel(project_path)
+    else:   
+        print("\nStep 3: Installing Laravel...")
+        if install_laravel(project_path):
+            print(f"\nSetup complete! Your Laravel project is at: {project_path}")
+        else:
+            print("\n✗ Laravel installation failed.")
     
     print("Step 4: Initialise Git repository")
     setup_git = input("Set up git remote repository? (y/n): ").lower()
